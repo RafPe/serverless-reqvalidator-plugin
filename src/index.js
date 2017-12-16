@@ -1,9 +1,8 @@
 'use strict';
 
 /**
- * 
- * Adds the posibility to configure AWS_IAM for your API Gateway endpoints
- * and "Invoke with caller credentials"
+ * Adds using of custom created request validator on specific functions by 
+ * adding `reqValidatorName`
  *
  * Usage:
  *
@@ -20,6 +19,7 @@
  *  Resources used:
  *  - https://www.snip2code.com/Snippet/1467589/adds-the-posibility-to-configure-AWS_IAM/
  */
+
 class ServerlessReqValidatorPlugin {
   constructor(serverless, options) {
     this.serverless = serverless;
@@ -29,7 +29,7 @@ class ServerlessReqValidatorPlugin {
     const naming  = this.serverless.providers.aws.naming;
 
     this.getMethodLogicalId = naming.getMethodLogicalId.bind(naming);
-    this.normalizePath = naming.normalizePath.bind(naming);
+    this.normalizePath      = naming.normalizePath.bind(naming);
 
     this._beforeDeploy = this.beforeDeploy.bind(this)
 
@@ -37,58 +37,49 @@ class ServerlessReqValidatorPlugin {
       'before:deploy:deploy': this._beforeDeploy
     };
 
-    this.documentationParts = [];
   }
 
   beforeDeploy() {
-    if (!(this.serverless.service.custom['aaa'] && this.serverless.service.custom )) return;
-
-    let validatorsMap = this.serverless.service.custom['aaa']
-
-    console.log( JSON.stringify(validatorsMap) )
-    console.log('-----------------')
-    console.log( JSON.stringify(this.serverless.service.functions) )
-    console.log('-----------------')
 
     const resources = this.serverless.service.provider.compiledCloudFormationTemplate.Resources
-    
-        console.log('Begin Attach plugin...')
-    
-        // Filter for any IAM Roles defined in CFT and apply our Managed Policies.
-        // && resources[resourceName].Properties.HttpMethod === 'POST' 
-        Object.keys(resources)
-          .filter(resourceName => resources[resourceName].Type === 'AWS::ApiGateway::Method')
-          .forEach(roleResource =>
-            {
+
+    this.serverless.service.getAllFunctions().forEach((functionName) => {
+      const functionObject = this.serverless.service.functions[functionName];
+
+      functionObject.events.forEach( event => {
+
+        if (!event.http) {return;}
 
 
+        if (event.http.reqValidatorName) {
 
-              // Here we iterate every method
-              console.log(JSON.stringify(resources[roleResource]))
-              resources[roleResource].Properties.RequestValidatorId = {"Ref":"xMyRequestValidator"};
-              console.log(JSON.stringify(resources[roleResource]))
-            }
-          )
+          let path;
+          let method;
 
+          if (typeof event.http === 'object') {
+            path   = event.http.path;
+            method = event.http.method;
+          } else if (typeof event.http === 'string') {
+            path   = event.http.split(' ')[1];
+            method = event.http.split(' ')[0];
+          }
 
+          const resourcesArray         = path.split('/');
+          // resource name is the last element in the endpoint. It's not unique.
+          const resourceName           = path.split('/')[path.split('/').length - 1];
+          const normalizedResourceName = resourcesArray.map(this.normalizePath).join('');
+          const normalizedMethod       = method[0].toUpperCase() + method.substr(1).toLowerCase();
+          const methodName             = `ApiGatewayMethod${normalizedResourceName}${normalizedMethod}`;
 
-    var xcfTemplate = this.serverless.service.provider.compiledCloudFormationTemplate;
+          resources[methodName].Properties.RequestValidatorId = {"Ref": `${event.http.reqValidatorName}`};
+          
 
-    //console.log(JSON.stringify(xcfTemplate))
-    // Add models to method resources
-    this.serverless.service.getAllFunctions()
-    .forEach(functionName => 
-      {
-        //console.log(`This is ${functionName}`)
-
-        // const func = this.serverless.service.getFunction(functionName);
-        // func.events.forEach(this.updateCfTemplateFromHttp.bind(this));    
-      }
-    );
-
-
-
+        }
+      });
+    }
+  )  
   }
+
 }
 
 module.exports = ServerlessReqValidatorPlugin;
