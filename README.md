@@ -1,16 +1,24 @@
 # serverless-reqvalidator-plugin
 Serverless plugin to set specific validator request on method
 
-# Installation 
+## Installation 
 ```
 npm install serverless-reqvalidator-plugin
 ```
 
-# Using plugin
+## Requirements
+This require you to have documentation plugin installed
+```
+serverless-aws-documentation
+```
+
+
+## Using plugin
 Specify plugin 
 ```
 plugins:
-    - serverless-reqvalidator-plugin
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 ```
 
 
