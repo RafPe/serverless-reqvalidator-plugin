@@ -16,6 +16,19 @@
  *           cors: true
  *           reqValidatorName: 'xyz'
  * 
+ * Alternative usage:
+ *
+ *   myFuncGetItem:
+ *     handler: myFunc.get
+ *     name: ${self:provider.stage}-myFunc-get-item
+ *     events:
+ *       - http:
+ *           method: GET
+ *           path: mypath
+ *           cors: true
+ *           reqValidatorName: 
+ *            Fn::ImportValue: 'my-import-value'
+ * 
  *  Resources used:
  *  - https://www.snip2code.com/Snippet/1467589/adds-the-posibility-to-configure-AWS_IAM/
  */
@@ -26,10 +39,10 @@ class ServerlessReqValidatorPlugin {
     this.options = options;
 
     this.provider = this.serverless.getProvider('aws');
-    const naming  = this.serverless.providers.aws.naming;
+    const naming = this.serverless.providers.aws.naming;
 
     this.getMethodLogicalId = naming.getMethodLogicalId.bind(naming);
-    this.normalizePath      = naming.normalizePath.bind(naming);
+    this.normalizePath = naming.normalizePath.bind(naming);
 
     this._beforeDeploy = this.beforeDeploy.bind(this)
 
@@ -46,38 +59,48 @@ class ServerlessReqValidatorPlugin {
     this.serverless.service.getAllFunctions().forEach((functionName) => {
       const functionObject = this.serverless.service.functions[functionName];
 
-      functionObject.events.forEach( event => {
+      functionObject.events.forEach(event => {
 
-        if (!event.http) {return;}
+        if (!event.http) { return; }
 
-
-        if (event.http.reqValidatorName) {
+        const reqValidatorName = event.http.reqValidatorName;
+        if (reqValidatorName) {
 
           let path;
           let method;
 
           if (typeof event.http === 'object') {
-            path   = event.http.path;
+            path = event.http.path;
             method = event.http.method;
           } else if (typeof event.http === 'string') {
-            path   = event.http.split(' ')[1];
+            path = event.http.split(' ')[1];
             method = event.http.split(' ')[0];
           }
 
-          const resourcesArray         = path.split('/');
+          const resourcesArray = path.split('/');
           // resource name is the last element in the endpoint. It's not unique.
-          const resourceName           = path.split('/')[path.split('/').length - 1];
+          const resourceName = path.split('/')[path.split('/').length - 1];
           const normalizedResourceName = resourcesArray.map(this.normalizePath).join('');
-          const normalizedMethod       = method[0].toUpperCase() + method.substr(1).toLowerCase();
-          const methodName             = `ApiGatewayMethod${normalizedResourceName}${normalizedMethod}`;
+          const normalizedMethod = method[0].toUpperCase() + method.substr(1).toLowerCase();
+          const methodName = `ApiGatewayMethod${normalizedResourceName}${normalizedMethod}`;
 
-          resources[methodName].Properties.RequestValidatorId = {"Ref": `${event.http.reqValidatorName}`};
-          
-
+          switch (typeof reqValidatorName) {
+            case 'object':
+              if (reqValidatorName['Fn::ImportValue']) {
+                resources[methodName].Properties.RequestValidatorId = reqValidatorName;
+              } else { // other use cases should be added here
+                resources[methodName].Properties.RequestValidatorId = reqValidatorName;
+              }
+              break;
+            case 'string':
+            default:
+              resources[methodName].Properties.RequestValidatorId = { "Ref": `${reqValidatorName}` };
+              break;
+          }
         }
       });
     }
-  )  
+    )
   }
 
 }
