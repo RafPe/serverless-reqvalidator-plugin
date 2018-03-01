@@ -1,6 +1,6 @@
 {
   "name": "serverless-reqvalidator-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Serverless plugin for setting request validation",
   "main": "src/index.js",
   "scripts": {
@@ -16,6 +16,9 @@
     "requestvalidator"
   ],
   "author": "RafPe < me@rafpe.ninja >",
+  "contributors": [
+    "pj035 pm.jaecks@gmail.com (http://pjaecks.de)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/RafPe/serverless-reqvalidator-plugin/issues"
