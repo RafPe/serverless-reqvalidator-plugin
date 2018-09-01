@@ -69,7 +69,7 @@ functions:
           reqValidatorName: 'myReqValidator'
 
 resources:
-  Resource:
+  Resources:
     xMyRequestValidator:
       Type: "AWS::ApiGateway::RequestValidator"
       Properties:
