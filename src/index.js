@@ -47,7 +47,7 @@ class ServerlessReqValidatorPlugin {
     this._beforeDeploy = this.beforeDeploy.bind(this)
 
     this.hooks = {
-      'before:package:finalize': this._beforeDeploy
+      'before:deploy:deploy': this._beforeDeploy
     };
 
   }
