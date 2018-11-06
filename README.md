@@ -102,3 +102,108 @@ functions:
           reqValidatorName:
             Fn::ImportValue: 'myReqValidator'
 ```
+
+### Full example 
+```
+service:
+  name: my-service
+
+plugins:
+  - serverless-webpack
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: eu-west-2
+  environment:
+    NODE_ENV: ${self:provider.stage}
+custom:
+  documentation:
+    api:
+      info:
+        version: '1.0.0'
+        title: My API
+        description: This is my API
+      tags:
+        -
+          name: User
+          description: User Management
+    models:
+      - name: MessageResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+      - name: RegisterUserRequest
+        contentType: "application/json"
+        schema:
+          required: 
+            - email
+            - password
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+      - name: RegisterUserResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            result:
+              type: string
+      - name: 400JsonResponse
+        contentType: "application/json"
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+            statusCode:
+              type: number
+  commonModelSchemaFragments:
+    MethodResponse400Json:
+      statusCode: '400'
+      responseModels:
+        "application/json": 400JsonResponse
+
+functions:
+  signUp:
+    handler: handler.signUp
+    events:
+      - http:
+          documentation:
+            summary: "Register user"
+            description: "Registers new user"
+            tags:
+              - User
+            requestModels:
+              "application/json": RegisterUserRequest
+          method: post
+          path: signup
+          reqValidatorName: onlyBody
+          methodResponses:
+              - statusCode: '200'
+                responseModels:
+                  "application/json": RegisterUserResponse
+              - ${self:custom.commonModelSchemaFragments.MethodResponse400Json}
+
+package:
+  include:
+    handler.ts
+
+resources:
+  Resources:
+    onlyBody:  
+      Type: "AWS::ApiGateway::RequestValidator"
+      Properties:
+        Name: 'only-body'
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+```
