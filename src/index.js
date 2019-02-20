@@ -97,6 +97,11 @@ class ServerlessReqValidatorPlugin {
               resources[methodName].Properties.RequestValidatorId = { "Ref": `${reqValidatorName}` };
               break;
           }
+
+          const requestModels = event.http.requestModels;
+          if (requestModels) {
+            resources[methodName].Properties.RequestModels = requestModels
+          }
         }
       });
     }
