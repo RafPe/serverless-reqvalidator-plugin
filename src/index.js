@@ -46,6 +46,14 @@ class ServerlessReqValidatorPlugin {
 
     this._beforeDeploy = this.beforeDeploy.bind(this)
 
+    // Create schema for your properties. For reference use https://github.com/ajv-validator/ajv
+    serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', {
+      properties: {
+        reqValidatorName: { type: 'string' },
+      },
+      required: ['reqValidatorName'],
+    });
+
     this.hooks = {
       'before:package:finalize': this._beforeDeploy
     };
