@@ -51,7 +51,6 @@ class ServerlessReqValidatorPlugin {
       properties: {
         reqValidatorName: { type: 'string' },
       },
-      required: ['reqValidatorName'],
     });
 
     this.hooks = {
