@@ -49,7 +49,16 @@ class ServerlessReqValidatorPlugin {
     // Create schema for your properties. For reference use https://github.com/ajv-validator/ajv
     serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', {
       properties: {
-        reqValidatorName: { type: 'string' },
+        reqValidatorName: {
+          anyOf: [
+            { type: 'string' },
+            { type: 'object',
+              properties: {
+                'Fn::ImportValue': { type: 'string' }
+              }
+            },
+          ]
+        },
       },
     });
 
