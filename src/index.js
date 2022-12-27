@@ -33,6 +33,21 @@
  *  - https://www.snip2code.com/Snippet/1467589/adds-the-posibility-to-configure-AWS_IAM/
  */
 
+const ServerlessReqValidatorPluginConfigSchema = {
+  properties: {
+    reqValidatorName: {
+      anyOf: [
+        { type: 'string' },
+        { type: 'object',
+          properties: {
+            'Fn::ImportValue': { type: 'string' }
+          },
+          required: ['Fn::ImportValue'],
+        },
+      ]
+    },
+  },
+}
 class ServerlessReqValidatorPlugin {
   constructor(serverless, options) {
     this.serverless = serverless;
@@ -47,11 +62,7 @@ class ServerlessReqValidatorPlugin {
     this._beforeDeploy = this.beforeDeploy.bind(this)
 
     // Create schema for your properties. For reference use https://github.com/ajv-validator/ajv
-    serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', {
-      properties: {
-        reqValidatorName: { type: 'string' },
-      },
-    });
+    serverless.configSchemaHandler.defineFunctionEventProperties('aws', 'http', ServerlessReqValidatorPluginConfigSchema);
 
     this.hooks = {
       'before:package:finalize': this._beforeDeploy
@@ -113,3 +124,4 @@ class ServerlessReqValidatorPlugin {
 }
 
 module.exports = ServerlessReqValidatorPlugin;
+module.exports.ServerlessReqValidatorPluginConfigSchema = ServerlessReqValidatorPluginConfigSchema;

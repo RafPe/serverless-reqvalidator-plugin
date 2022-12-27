@@ -1,10 +1,10 @@
 {
   "name": "serverless-reqvalidator-plugin",
-  "version": "1.0.3",
+  "version": "3.0.0",
   "description": "Serverless plugin for setting request validation",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest test"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,10 @@
   "bugs": {
     "url": "https://github.com/RafPe/serverless-reqvalidator-plugin/issues"
   },
-  "homepage": "https://github.com/RafPe/serverless-reqvalidator-plugin#readme"
+  "homepage": "https://github.com/RafPe/serverless-reqvalidator-plugin#readme",
+  "devDependencies": {
+    "ajv": "^8.11.2",
+    "jest": "^29.3.1",
+    "js-yaml": "^4.1.0"
+  }
 }

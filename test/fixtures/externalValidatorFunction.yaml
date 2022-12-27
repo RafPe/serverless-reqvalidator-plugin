@@ -1,0 +1,11 @@
+plugins:
+  - serverless-reqvalidator-plugin
+service: my-service-b
+functions:
+  hello:
+    handler: handler.myHandler
+    events:
+      - http:
+          path: hello
+          reqValidatorName:
+            Fn::ImportValue: 'myReqValidator'
