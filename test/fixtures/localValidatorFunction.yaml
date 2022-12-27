@@ -1,0 +1,27 @@
+plugins:
+  - serverless-reqvalidator-plugin
+service: my-service-a
+functions:
+  hello:
+    handler: handler.myHandler
+    events:
+      - http:
+          path: hello
+          reqValidatorName: 'myReqValidator'
+
+resources:
+  Resources:
+    xMyRequestValidator:
+      Type: "AWS::ApiGateway::RequestValidator"
+      Properties:
+        Name: 'my-req-validator'
+        RestApiId: 
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+  Outputs:
+    xMyRequestValidator:
+      Value:
+        Ref: my-req-validator
+      Export:
+        Name: myReqValidator

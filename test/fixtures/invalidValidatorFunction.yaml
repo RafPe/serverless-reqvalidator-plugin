@@ -1,0 +1,11 @@
+plugins:
+  - serverless-reqvalidator-plugin
+service: my-service-d
+functions:
+  hello:
+    handler: handler.myHandler
+    events:
+      - http:
+          path: hello
+          reqValidatorName:
+            data: 123

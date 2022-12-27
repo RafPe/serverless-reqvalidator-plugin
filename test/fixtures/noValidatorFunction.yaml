@@ -1,0 +1,9 @@
+plugins:
+  - serverless-reqvalidator-plugin
+service: my-service-c
+functions:
+  hello:
+    handler: handler.myHandler
+    events:
+      - http:
+          path: hello
