@@ -38,4 +38,11 @@ describe('serverless-reqvalidator-plugin schema', () => {
     const valid = validateConfig(config.functions.hello.events[0].http);
     expect(valid).toBeFalsy();
   });
+
+  it('should validate a configuration with an external reqValidatorName.id property', () => {
+    const config = yaml.load(fs.readFileSync('./test/fixtures/externalValidatorId.yaml', 'utf8'));
+
+    const valid = validateConfig(config.functions.hello.events[0].http);
+    expect(valid).toBeTruthy();
+  })
 });

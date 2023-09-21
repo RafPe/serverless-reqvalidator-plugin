@@ -103,6 +103,23 @@ functions:
             Fn::ImportValue: 'myReqValidator'
 ```
 
+### Use an external validator by ID
+If you have an existing request validator defined outside of CloudFormation e.g. Terraform, you can reference it by id.
+
+```
+plugins:
+  - serverless-reqvalidator-plugin
+service: my-service-a
+functions:
+  hello:
+    handler: handler.myHandler
+    events:
+      - http:
+          path: hello
+          reqValidatorName:
+            id: 'g5ch0h'
+```
+
 ### Full example 
 ```
 service:

@@ -29,6 +29,21 @@
  *           reqValidatorName: 
  *            Fn::ImportValue: 'my-import-value'
  * 
+ * Use request validator by Id:
+ * 
+ *   myFuncGetItem:
+ *     handler: myFunc.get
+ *     name: ${self:provider.stage}-myFunc-get-item
+ *     events:
+ *       - http:
+ *           method: GET
+ *           path: mypath
+ *           cors: true
+ *           reqValidatorName: 
+ *             id: 'g5ch0h'
+ * 
+ * 
+ * 
  *  Resources used:
  *  - https://www.snip2code.com/Snippet/1467589/adds-the-posibility-to-configure-AWS_IAM/
  */
@@ -43,6 +58,12 @@ const ServerlessReqValidatorPluginConfigSchema = {
             'Fn::ImportValue': { type: 'string' }
           },
           required: ['Fn::ImportValue'],
+        },
+        { type: 'object',
+          properties: {
+            id: { type: 'string' },
+          },
+          required: ['id'],
         },
       ]
     },
@@ -106,6 +127,8 @@ class ServerlessReqValidatorPlugin {
             case 'object':
               if (reqValidatorName['Fn::ImportValue']) {
                 resources[methodName].Properties.RequestValidatorId = reqValidatorName;
+              } else if (reqValidatorName['id']) {
+                resources[methodName].Properties.RequestValidatorId = reqValidatorName['id']
               } else { // other use cases should be added here
                 resources[methodName].Properties.RequestValidatorId = reqValidatorName;
               }
